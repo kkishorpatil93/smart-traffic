@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Smart Traffic Signal - Live Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1e272e;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 { margin-bottom: 5px; color: #00d2d3; }
+        p.subtitle { color: #8395a7; margin-top: 0; margin-bottom: 25px; }
+
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            background: #2f3542;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+        }
+
+        /* Input Controls */
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .input-card {
+            background: #1e272e;
+            padding: 15px;
+            border-radius: 10px;
+            border-top: 4px solid #00d2d3;
+        }
+        .input-card label { display: block; font-weight: bold; margin-bottom: 8px; }
+        .input-card input {
+            width: 80%;
+            padding: 8px;
+            font-size: 16px;
+            border-radius: 6px;
+            border: 1px solid #57606f;
+            background: #2f3542;
+            color: white;
+            text-align: center;
+        }
+
+        /* Buttons */
+        .btn-calc {
+            background: #10ac84;
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-calc:hover { background: #1dd1a1; }
+
+        /* Junction Visualizer */
+        .junction-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin: 25px 0;
+        }
+        .road-box {
+            background: #1e272e;
+            padding: 15px;
+            border-radius: 12px;
+        }
+        .traffic-light {
+            background: #000;
+            width: 50px;
+            padding: 10px;
+            border-radius: 15px;
+            margin: 10px auto;
+        }
+        .bulb {
+            width: 35px;
+            height: 35px;
+            background: #333;
+            border-radius: 50%;
+            margin: 8px auto;
+            transition: 0.3s;
+        }
+        .red-on { background: #ff4757 !important; box-shadow: 0 0 18px #ff4757; }
+        .yellow-on { background: #ffa502 !important; box-shadow: 0 0 18px #ffa502; }
+        .green-on { background: #2ed573 !important; box-shadow: 0 0 18px #2ed573; }
+
+        /* Status & Logs */
+        .status-box {
+            background: #1e272e;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: left;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 14px;
+            color: #7bed9f;
+            max-height: 180px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🚦 Smart Traffic Signal Dashboard</h1>
+        <p class="subtitle">Connected Live to Python Flask Backend (http://127.0.0.1:5000)</p>
+
+        <!-- 1. Input Vehicle Numbers -->
+        <div class="input-grid">
+            <div class="input-card">
+                <label>North Road</label>
+                <input type="number" id="north" value="15">
+            </div>
+            <div class="input-card">
+                <label>South Road</label>
+                <input type="number" id="south" value="8">
+            </div>
+            <div class="input-card">
+                <label>East Road</label>
+                <input type="number" id="east" value="42">
+            </div>
+            <div class="input-card">
+                <label>West Road</label>
+                <input type="number" id="west" value="20">
+            </div>
+        </div>
+
+        <button class="btn-calc" onclick="sendToBackend()">⚡ Send to Python Backend & Calculate</button>
+
+        <!-- 2. Visual Traffic Signals for 4 Roads -->
+        <div class="junction-grid">
+            <!-- North -->
+            <div class="road-box">
+                <h3>North</h3>
+                <div class="traffic-light">
+                    <div id="north-red" class="bulb red-on"></div>
+                    <div id="north-yellow" class="bulb"></div>
+                    <div id="north-green" class="bulb"></div>
+                </div>
+                <div id="north-info">Waiting...</div>
+            </div>
+
+            <!-- South -->
+            <div class="road-box">
+                <h3>South</h3>
+                <div class="traffic-light">
+                    <div id="south-red" class="bulb red-on"></div>
+                    <div id="south-yellow" class="bulb"></div>
+                    <div id="south-green" class="bulb"></div>
+                </div>
+                <div id="south-info">Waiting...</div>
+            </div>
+
+            <!-- East -->
+            <div class="road-box">
+                <h3>East</h3>
+                <div class="traffic-light">
+                    <div id="east-red" class="bulb red-on"></div>
+                    <div id="east-yellow" class="bulb"></div>
+                    <div id="east-green" class="bulb"></div>
+                </div>
+                <div id="east-info">Waiting...</div>
+            </div>
+
+            <!-- West -->
+            <div class="road-box">
+                <h3>West</h3>
+                <div class="traffic-light">
+                    <div id="west-red" class="bulb red-on"></div>
+                    <div id="west-yellow" class="bulb"></div>
+                    <div id="west-green" class="bulb"></div>
+                </div>
+                <div id="west-info">Waiting...</div>
+            </div>
+        </div>
+
+        <!-- 3. Live Backend Logs -->
+        <div class="status-box" id="logBox">
+            Status: Ready. Click the button above to talk to your Python backend!
+        </div>
+    </div>
+
+    <script>
+        async function sendToBackend() {
+            const northVal = parseInt(document.getElementById('north').value) || 0;
+            const southVal = parseInt(document.getElementById('south').value) || 0;
+            const eastVal  = parseInt(document.getElementById('east').value) || 0;
+            const westVal  = parseInt(document.getElementById('west').value) || 0;
+
+            const logBox = document.getElementById('logBox');
+            logBox.innerText = "Connecting to http://127.0.0.1:5000/api/traffic ...";
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/api/traffic', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        north: northVal,
+                        south: southVal,
+                        east: eastVal,
+                        west: westVal
+                    })
+                });
+
+                const data = await response.json();
+                logBox.innerText = "Response from Python Backend:\n" + JSON.stringify(data, null, 2);
+
+                // Update all 4 roads on screen
+                const roads = ['north', 'south', 'east', 'west'];
+                roads.forEach(road => {
+                    // Turn off all lights
+                    document.getElementById(road + '-red').className = 'bulb';
+                    document.getElementById(road + '-yellow').className = 'bulb';
+                    document.getElementById(road + '-green').className = 'bulb';
+
+                    const state = data.signal_states[road].state;
+                    const duration = data.signal_states[road].green_duration;
+                    const density = data.detailed_analysis[road].density;
+
+                    if (state === 'GREEN') {
+                        document.getElementById(road + '-green').className = 'bulb green-on';
+                        document.getElementById(road + '-info').innerHTML = `<strong style="color:#2ed573">GREEN (${duration}s)</strong><br><small>${density} Density</small>`;
+                    } else {
+                        document.getElementById(road + '-red').className = 'bulb red-on';
+                        document.getElementById(road + '-info').innerHTML = `<span style="color:#ff4757">RED</span><br><small>${density} Density</small>`;
+                    }
+                });
+
+            } catch (err) {
+                logBox.innerText = "Error: Could not connect to Python backend! Make sure python app.py is running.";
+                console.error(err);
+            }
+        }
+    </script>
+</body>
+</html>
