@@ -198,10 +198,11 @@
             const westVal  = parseInt(document.getElementById('west').value) || 0;
 
             const logBox = document.getElementById('logBox');
-            logBox.innerText = "Connecting to http://127.0.0.1:5000/api/traffic ...";
+            logBox.innerText = "Calculating signals ...";
 
             try {
-                const response = await fetch('http://127.0.0.1:5000/api/traffic', {
+                // Uses relative endpoint so it works both locally and on Vercel cloud!
+                const response = await fetch('/api/traffic', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({

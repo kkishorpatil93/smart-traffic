@@ -1,5 +1,5 @@
 import os
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_file
 from flask_cors import CORS
 
 # =====================================================================
@@ -64,7 +64,9 @@ def calculate_green_duration(density: str) -> int:
 
 @app.route('/', methods=['GET'])
 def home():
-    """Welcome route for root URL."""
+    """Serves the interactive frontend dashboard if available, else JSON status."""
+    if os.path.exists('index.html'):
+        return send_file('index.html')
     return jsonify({
         "status": "online",
         "service": "Smart Traffic Signal Backend",
